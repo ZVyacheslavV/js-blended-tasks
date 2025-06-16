@@ -87,14 +87,14 @@ console.log(result);
 // Корисне посилання для відображення годин та хвилин у потрібному форматі ('01' замість '1'):
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart#examples
 
-let numberMinutes = prompt('Input time in minutes:');
+const numberMinutes = +prompt('Input time in minutes:');
 
 console.log(
-  Math.floor(+numberMinutes / 60)
+  Math.floor(numberMinutes / 60)
     .toString()
     .padStart(2, '0'),
   ':',
-  Math.floor(+numberMinutes % 60)
+  Math.floor(numberMinutes % 60)
     .toString()
     .padStart(2, '0')
 );
@@ -125,7 +125,7 @@ if (userLogin === 'Адмін') {
   userPassword === 'Я головний'
     ? alert('Добрий день!')
     : alert('Невірний пароль!');
-} else if (userLogin === '') alert('Скасовано');
+} else if (!userLogin) alert('Скасовано');
 else alert('Я вас не знаю');
 
 //================================================================
@@ -166,9 +166,9 @@ console.log(getNumbers(35, 75));
 
 const min2 = (a, b) => {
   if (typeof a != 'number' || typeof b != 'number') return 'Not a number!';
-  else return a > b ? b : a;
+  return a > b ? b : a;
 };
-console.log(min2(32, 3));
+console.log(min2(3223, 324121));
 
 //================================================================
 /* == 9 == */
