@@ -15,7 +15,8 @@
 const styles = ['jazz', 'blues'];
 styles.push('rock-n-roll');
 
-styles[styles.indexOf('blues')] = 'classic';
+const index = styles.indexOf('blues');
+if (index !== -1) styles[index] = 'classic';
 
 const logItems = array => {
   for (let i = 0; i < array.length; i++) console.log(`${i + 1} - ${array[i]}`);
