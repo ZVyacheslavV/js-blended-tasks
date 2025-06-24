@@ -529,19 +529,246 @@ console.log('//IndexFor: ', indexFor, ' IndexOf: ', indexOff);
 //================================================================
 /* == Random array with strings == */
 
-const generateRandomStrings = (count = 100, length = 5) => {
+const generateRandomStrings = (count = 100, length = 8) => {
   const characters =
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   const getRandomString = () =>
     Array.from(
-      { length },
+      { length: Math.floor(Math.random() * (length - 2) + 3) },
       () => characters[Math.floor(Math.random() * characters.length)]
     ).join('');
 
   return Array.from({ length: count }, getRandomString);
 };
 
-const randomStrings = generateRandomStrings();
-console.log(randomStrings);
+const rndStringToSearch = 'iStGA0i'; /* generateRandomStrings(1) */
+console.log(rndStringToSearch);
+
+const randomStrings1 = generateRandomStrings(10000);
+randomStrings1[4443] = 'iStGA0i';
+console.log(randomStrings1);
+const randomStrings2 = generateRandomStrings(10000);
+console.log(randomStrings2);
+
+// START PERFORMANCE COMPARISON ---------------------------------------------------
+
+let foundForOf = false;
+let foundFor = false;
+let foundIndexOf = false;
+
+let indexFor = -1;
+let indexOff = -1;
+
+const iterations = 10000;
+const times = 100;
+const warmUpTimes = 3;
+const execTime0 = [];
+for (let k = 0; k < warmUpTimes + times; k++) {
+  const startPerformance0 = performance.now();
+  for (let i = 0; i < iterations; i++) {}
+  const endPerformance0 = performance.now();
+  execTime0.push(endPerformance0 - startPerformance0);
+}
+const total0 = execTime0.slice(warmUpTimes).reduce((acc, val) => acc + val, 0);
+const avg0 = total0 / (iterations * times);
+const sorted0 = [...execTime0].sort((a, b) => a - b);
+const md0 =
+  sorted0.length % 2 === 0
+    ? (sorted0[sorted0.length / 2 - 1] + sorted0[sorted0.length / 2]) / 2
+    : sorted0[Math.floor(sorted0.length / 2)];
+const execTime1 = [];
+for (let k = 0; k < warmUpTimes + times; k++) {
+  const startPerformance1 = performance.now();
+  for (let i = 0; i < iterations; i++) {
+    // ::: First code for performance comparison :::
+    for (const elem of randomStrings1)
+      if (elem === rndStringToSearch) {
+        foundForOf = true;
+        break;
+      }
+    // ::: End first code :::
+  }
+  const endPerformance1 = performance.now();
+  execTime1.push(endPerformance1 - startPerformance1);
+}
+const total1 = execTime1.slice(warmUpTimes).reduce((acc, val) => acc + val, 0);
+const avg1 = Math.abs(total1 / (iterations * times) - avg0);
+const sorted1 = [...execTime1].sort((a, b) => a - b);
+const md1 =
+  sorted1.length % 2 === 0
+    ? (sorted1[sorted1.length / 2 - 1] + sorted1[sorted1.length / 2]) / 2 - md0
+    : sorted1[Math.floor(sorted1.length / 2)] - md0;
+const execTime2 = [];
+for (let k = 0; k < warmUpTimes + times; k++) {
+  const startPerformance2 = performance.now();
+  for (let i = 0; i < iterations; i++) {
+    // ::: Second code for performance comparison :::
+    for (let i = 0; i < randomStrings1.length; i++)
+      if (randomStrings1[i] === rndStringToSearch) {
+        foundFor = true;
+        indexFor = i;
+        break;
+      }
+    // ::: End second code :::
+  }
+  const endPerformance2 = performance.now();
+  execTime2.push(endPerformance2 - startPerformance2);
+}
+const total2 = execTime2.slice(warmUpTimes).reduce((acc, val) => acc + val, 0);
+const avg2 = Math.abs(total2 / (iterations * times) - avg0);
+const sorted2 = [...execTime2].sort((a, b) => a - b);
+const md2 =
+  sorted2.length % 2 === 0
+    ? (sorted2[sorted2.length / 2 - 1] + sorted2[sorted2.length / 2]) / 2 - md0
+    : sorted2[Math.floor(sorted2.length / 2)] - md0;
+const execTime3 = [];
+for (let k = 0; k < warmUpTimes + times; k++) {
+  const startPerformance3 = performance.now();
+  for (let i = 0; i < iterations; i++) {
+    // ::: Third code for performance comparison :::
+    indexOff = randomStrings1.indexOf(rndStringToSearch);
+    if (indexOff !== -1) foundIndexOf = true;
+    // ::: End third code :::
+  }
+  const endPerformance3 = performance.now();
+  execTime3.push(endPerformance3 - startPerformance3);
+}
+const total3 = execTime3.slice(warmUpTimes).reduce((acc, val) => acc + val, 0);
+const avg3 = Math.abs(total3 / (iterations * times) - avg0);
+const sorted3 = [...execTime3].sort((a, b) => a - b);
+const md3 =
+  sorted3.length % 2 === 0
+    ? (sorted3[sorted3.length / 2 - 1] + sorted3[sorted3.length / 2]) / 2 - md0
+    : sorted3[Math.floor(sorted3.length / 2)] - md0;
+console.log(`\nExecution times for each run over ${iterations} iterations:`);
+console.log('WarmUp 1st: ', execTime1.slice(0, warmUpTimes));
+console.log('First solution:', execTime1.slice(warmUpTimes));
+console.log('WarmUp 2nd: ', execTime2.slice(0, warmUpTimes));
+console.log('Second solution:', execTime2.slice(warmUpTimes));
+console.log('WarmUp 3rd: ', execTime3.slice(0, warmUpTimes));
+console.log('Third solution:', execTime3.slice(warmUpTimes));
+console.log('\n// Median of full runs 1st:', md1.toFixed(3).padStart(11), 'ms');
+console.log('// Median of full runs 2nd:', md2.toFixed(3).padStart(11), 'ms');
+console.log('// Median of full runs 3rd:', md3.toFixed(3).padStart(11), 'ms');
+console.log('// Average per iteration 1st:', avg1.toFixed(6).padStart(9), 'ms');
+console.log('// Average per iteration 2nd:', avg2.toFixed(6).padStart(9), 'ms');
+console.log('// Average per iteration 3rd:', avg3.toFixed(6).padStart(9), 'ms');
+
+// END PERFORMANCE COMPARISON -----------------------------------------------------
+console.log(
+  '//Flags - ForOf, For, IndexOf: ',
+  foundForOf,
+  foundFor,
+  foundIndexOf
+);
+console.log('//IndexFor: ', indexFor, ' IndexOf: ', indexOff);
+
+//String array 10000
+// Median of full runs 1st:      98.886 ms
+// Median of full runs 2nd:      97.745 ms
+// Median of full runs 3rd:      18.405 ms
+// Average per iteration 1st:  0.009905 ms
+// Average per iteration 2nd:  0.009786 ms
+// Average per iteration 3rd:  0.001845 ms
+//Flags - ForOf, For, IndexOf:  false false false
+//IndexFor:  -1  IndexOf:  -1
+
+//String array 10000
+// Median of full runs 1st:     100.118 ms
+// Median of full runs 2nd:      99.184 ms
+// Median of full runs 3rd:      18.367 ms
+// Average per iteration 1st:  0.010013 ms
+// Average per iteration 2nd:  0.009866 ms
+// Average per iteration 3rd:  0.001839 ms
+//Flags - ForOf, For, IndexOf:  false false false
+//IndexFor:  -1  IndexOf:  -1
+
+//String array 10000
+// Median of full runs 1st:     101.025 ms
+// Median of full runs 2nd:     100.405 ms
+// Median of full runs 3rd:      18.379 ms
+// Average per iteration 1st:  0.010105 ms
+// Average per iteration 2nd:  0.010017 ms
+// Average per iteration 3rd:  0.001840 ms
+//Flags - ForOf, For, IndexOf:  false false false
+//IndexFor:  -1  IndexOf:  -1
+
+//String array 10000
+// Median of full runs 1st:      99.439 ms
+// Median of full runs 2nd:     100.056 ms
+// Median of full runs 3rd:      18.578 ms
+// Average per iteration 1st:  0.009925 ms
+// Average per iteration 2nd:  0.010042 ms
+// Average per iteration 3rd:  0.001860 ms
+//Flags - ForOf, For, IndexOf:  false false false
+//IndexFor:  -1  IndexOf:  -1
+
+//String array 10000 stringToSearch 'ikti' 4443
+// Median of full runs 1st:      85.188 ms
+// Median of full runs 2nd:      66.976 ms
+// Median of full runs 3rd:      30.357 ms
+// Average per iteration 1st:  0.008542 ms
+// Average per iteration 2nd:  0.006677 ms
+// Average per iteration 3rd:  0.003036 ms
+//Flags - ForOf, For, IndexOf:  true true true
+//IndexFor:  4443  IndexOf:  4443
+
+//String array 10000 stringToSearch 'iktiikti' 4443
+// Median of full runs 1st:      84.698 ms
+// Median of full runs 2nd:      65.732 ms
+// Median of full runs 3rd:      30.082 ms
+// Average per iteration 1st:  0.008477 ms
+// Average per iteration 2nd:  0.006556 ms
+// Average per iteration 3rd:  0.003018 ms
+//Flags - ForOf, For, IndexOf:  true true true
+//IndexFor:  4443  IndexOf:  4443
+
+//String array 10000 stringToSearch 'iStGA0i' 4443
+// Median of full runs 1st:      87.245 ms
+// Median of full runs 2nd:      69.033 ms
+// Median of full runs 3rd:      30.825 ms
+// Average per iteration 1st:  0.008711 ms
+// Average per iteration 2nd:  0.006879 ms
+// Average per iteration 3rd:  0.003092 ms
+//Flags - ForOf, For, IndexOf:  true true true
+//IndexFor:  4443  IndexOf:  4443
+
+//String array 10000 stringToSearch 'iktiikti' 8443
+// Median of full runs 1st:     180.651 ms
+// Median of full runs 2nd:     147.174 ms
+// Median of full runs 3rd:      59.819 ms
+// Average per iteration 1st:  0.018162 ms
+// Average per iteration 2nd:  0.014702 ms
+// Average per iteration 3rd:  0.005970 ms
+//Flags - ForOf, For, IndexOf:  true true true
+//IndexFor:  8443  IndexOf:  8443
+
+//String array 10000 stringToSearch 'iktiikti' 443
+// Median of full runs 1st:       5.748 ms
+// Median of full runs 2nd:       6.032 ms
+// Median of full runs 3rd:       2.911 ms
+// Average per iteration 1st:  0.000580 ms
+// Average per iteration 2nd:  0.000606 ms
+// Average per iteration 3rd:  0.000292 ms
+//Flags - ForOf, For, IndexOf:  true true true
+//IndexFor:  443  IndexOf:  443
 
 //================================================================
+// Hypothesis: indexOf for searching in strings. Clear "for", for numbers. "For of" the worst one?. Is "For" better then "For of"?
+//================================================================
+
+// ChatGPT answer for and for of comparison:
+// | **Case**                      | **Classic `for`**                               | **`for...of`**                                          | **Which is Faster?**            |
+// | ----------------------------- | ----------------------------------------------- | ------------------------------------------------------- | ------------------------------- |
+// | **Iterating over arrays**     | Fastest option (index-based, low-level control) | Slightly slower due to iterator abstraction             | `for` (by \~20–100%)            |
+// | **Sparse arrays**             | Iterates over holes (e.g., `[,,2]`)             | Skips holes                                             | Depends                         |
+// | **Typed arrays**              | Very fast                                       | Slower due to abstraction                               | `for`                           |
+// | **Strings**                   | Works via `str[i]` access                       | Cleaner, and handles surrogate pairs correctly          | `for` (but `for...of` is safer) |
+// | **Sets and Maps**             | Needs conversion or `.values()`                 | Native and more readable                                | `for...of` (easier)             |
+// | **Custom iterable objects**   | Not usable directly                             | Works naturally if `Symbol.iterator` is implemented     | `for...of` only                 |
+// | **Early exit (`break`)**      | Works                                           | Works                                                   | Equal                           |
+// | **Async environments**        | Not suitable for async iterables                | Use `for await...of` for async iterables                | `for...of` (wins)               |
+// | **Memory usage**              | Slightly more efficient (lower overhead)        | Slightly higher (iterator objects created)              | `for`                           |
+// | **Code readability**          | Verbose (manual index management)               | Cleaner and declarative                                 | `for...of`                      |
+// | **Mutating during iteration** | Full control, can mutate array                  | Riskier — underlying iterator might not expect mutation | `for`                           |
+// | **Future extensibility**      | Manual expansion required                       | Adapts well to iterables, including new data structures | `for...of`                      |
